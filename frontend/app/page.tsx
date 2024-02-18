@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
-import { signIn, useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import { EstateType, SessionInfo, StockType } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import DraggableElement from "@/components/DraggableElement";
@@ -11,7 +11,7 @@ import DropZone from "@/components/DropZone";
 import DragAndDropContainer from "@/components/DroppedItem";
 import PopUp, { PopUpInfoType } from "@/components/PopUp";
 
-const Container = () => {
+const Page = () => {
     const [droppedItems, setDroppedItems] = useState<string[]>([]);
     const [popUpText, setPopUpText] = useState<string>();
     const [realEstateInfo, setRealEstateInfo] = useState<EstateType[]>()
@@ -22,6 +22,10 @@ const Container = () => {
     const [rpm, setRpm] = useState<number>(0)
 
     const { data: session } = useSession()
+
+    if (session?.user && !SessionInfo.get("Email")) {
+        SessionInfo.session = session
+    }
 
     const [isOverlayOn, setIsOverlayOn] = useState<PopUpInfoType>({
         isOn: false,
@@ -150,6 +154,7 @@ const Container = () => {
                             </div>
                             <div>
                                 {SessionInfo.get("Email") ? SessionInfo.get("Email") : <p
+                                    className="cursor-pointer"
                                     onClick={() => signIn()}
                                 >Sign in</p>}
                             </div>
@@ -169,7 +174,7 @@ const Container = () => {
                             </TabsTrigger>
                             <TabsTrigger value='Stocks'>Stocks</TabsTrigger>
                         </TabsList>
-                      
+
                         <TabsContent value='Real Estates'>
                             <div>High returns with maintenance fees</div>
                             {realEstateInfo ? realEstateInfo.map(info => {
@@ -206,6 +211,6 @@ const Container = () => {
     );
 };
 
-export default dynamic(() => Promise.resolve(Container), {
+export default dynamic(() => Promise.resolve(Page), {
     ssr: false,
 })
