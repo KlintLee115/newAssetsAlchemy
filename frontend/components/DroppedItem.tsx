@@ -50,7 +50,7 @@ const DraggableItem = ({ itemId }: { itemId: string, }) => {
             ref={dragItemRef}
             onMouseDown={startDragging}
             style={{ position: 'absolute', left: `${position.x}px`, top: `${position.y}px` }}
-            className='w-fit flex items-center gap-2 border rounded-2xl m-5 py-5 px-3 hover:bg-zinc-100 transition '>
+            className='cursor-grab w-fit flex items-center gap-2 border rounded-2xl m-5 py-5 px-3 hover:bg-zinc-100 transition '>
             <Image className='text-2xl' src={itemId.toLowerCase()+".svg"} width={18}
                 height={18} alt="icon" />
             <span className='font-medium'>{itemId}</span>

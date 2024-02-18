@@ -4,12 +4,6 @@ import React, { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import { signIn, useSession } from 'next-auth/react';
-
-import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { EstateType, SessionInfo, StockType } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import DraggableElement from "@/components/DraggableElement";
@@ -61,26 +55,24 @@ const Container = () => {
 
         async function setRealEstate() {
             const response = await fetch('http://localhost:3001/realEstates')
-            const data = await response.json()
-            setRealEstateInfo(data)
+            setRealEstateInfo(await response.json())
         }
 
         async function setStocks() {
             const response = await fetch('http://localhost:3001/stocks')
-            const data = await response.json()
-            setStocksInfo(data)
+            setStocksInfo(await response.json())
         }
 
         Promise.all([setRealEstate(), setStocks()])
 
-        if (!SessionInfo.get("Email") && session?.user) {
-            SessionInfo.session = session
-        }
+        if (!SessionInfo.get("Email") && session?.user) SessionInfo.session = session
     }, [])
 
     return (
         <>
             <PopUp
+                stocksInfo={stocksInfo}
+                realEstateInfo={realEstateInfo}
                 coins={coins}
                 creditScore={creditScore}
                 debt={debt}
@@ -121,11 +113,9 @@ const Container = () => {
                                 <div className='flex flex-col items-center gap-1 text-sm'>
                                     <div className='flex gap-1 items-end'>
                                         <h2 className='font-semibold'>
-                                            {" "}
                                             Credit Amount{" "}
                                         </h2>
                                         <span className='text-[10px] font-medium'>
-                                            {" "}
                                             (20% interest){" "}
                                         </span>
                                     </div>
@@ -153,20 +143,8 @@ const Container = () => {
                                         {" "}
                                         Credit Score{" "}
                                     </h2>
-                                    <div className='flex items-center gap-2'>
-                                        <HoverCard>
-                                            <HoverCardTrigger>
-                                                {/* <FaCircleInfo /> */}
-                                            </HoverCardTrigger>
-                                            <HoverCardContent side='bottom'>
-                                                Checking your credit score will
-                                                deduct a certain amount of your
-                                                credit score.
-                                            </HoverCardContent>
-                                        </HoverCard>
-                                        <span className='font-medium'>
-                                            {creditScore}
-                                        </span>
+                                    <div className='flex items-center gap-2 font-medium'>
+                                        {creditScore}
                                     </div>
                                 </div>
                             </div>
@@ -183,23 +161,15 @@ const Container = () => {
                 </div>
                 <div className='w-1/3 p-4'>
                     {/* Adjusted width for the tabs container */}
-                    <Tabs defaultValue='account'>
+                    <Tabs defaultValue='Real Estates'>
                         <TabsList>
                             {/* <TabsTrigger value='all'>Owned</TabsTrigger> */}
                             <TabsTrigger value='Real Estates'>
-                                {" "}
-                                Real Estates{" "}
+                                Real Estates
                             </TabsTrigger>
                             <TabsTrigger value='Stocks'>Stocks</TabsTrigger>
                         </TabsList>
-                        <TabsContent value='all'>
-                            <div>
-                                <p className='text-center text-sm font-medium text-zinc-400 mt-10'>
-                                    {" "}
-                                    You don&apos;t own anything at the moment.{" "}
-                                </p>
-                            </div>
-                        </TabsContent>
+                      
                         <TabsContent value='Real Estates'>
                             <div>High returns with maintenance fees</div>
                             {realEstateInfo ? realEstateInfo.map(info => {
@@ -214,7 +184,7 @@ const Container = () => {
                             }
                         </TabsContent>
                         <TabsContent value='Stocks'>
-                        <div>High risk with less capital</div>
+                            <div>High risk with less capital</div>
                             {stocksInfo ? stocksInfo.map(info => {
                                 return <DraggableElement
                                     key={info.id}

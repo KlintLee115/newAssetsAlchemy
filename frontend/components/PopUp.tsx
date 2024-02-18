@@ -1,6 +1,6 @@
 "use client"
 
-import { SessionInfo } from "@/lib/utils";
+import { EstateType, SessionInfo, StockType } from "@/lib/utils";
 import { Dispatch, SetStateAction } from "react";
 
 export type PopUpInfoType = {
@@ -9,6 +9,8 @@ export type PopUpInfoType = {
 }
 
 type PopUpPropsType = {
+    realEstateInfo?: EstateType[],
+    stocksInfo?: StockType[],
     text: string, addItem: (value: React.SetStateAction<string[]>) => void, isOverlayOn: boolean,
     setIsOverlayOn: Dispatch<SetStateAction<PopUpInfoType>>,
     debt: number,
@@ -20,69 +22,42 @@ type PopUpPropsType = {
 }
 
 
-export default function PopUp({ text, isOverlayOn, setIsOverlayOn, addItem, setRpm, setDebt, debt, creditScore, coins, setCoins }: PopUpPropsType) {
+export default function PopUp({ realEstateInfo, stocksInfo, text, isOverlayOn, setIsOverlayOn, addItem, setRpm, setDebt, debt, creditScore, coins, setCoins }: PopUpPropsType) {
 
     const cancelOverlay = () => setIsOverlayOn({ isOn: false })
 
     let addRpmAmt = 0;
     let requiredCoins = 0;
     let requiredDebt = 0;
+    let foundItem = false
 
-    switch (text) {
-        case 'House': {
-            addRpmAmt = 20
-            requiredCoins = 4000
-            requiredDebt = 30
-            break
-        }
-        case 'Mansion': {
-            addRpmAmt = 40
-            requiredCoins = 7000
-            requiredDebt = 40
-            break
-        }
-        case 'Apartment': {
-            addRpmAmt = 20
-            requiredCoins = 3500
-            requiredDebt = 20
-            break
-        }
-        case 'Hotel': {
-            addRpmAmt = 40
-            requiredCoins = 6000
-            requiredDebt = 50
-            break
-        }
-        case 'Apple': {
-            addRpmAmt = 20
-            requiredCoins = 150
-            requiredDebt = 170
-            break
-        }
-        case 'Microsoft': {
-            addRpmAmt = 40
-            requiredCoins = 170
-            requiredDebt = 200
-            break
-        }
-        case 'Google': {
-            addRpmAmt = 20
-            requiredCoins = 200
-            requiredDebt = 250
-            break
-        }
-        case 'Meta': {
-            addRpmAmt = 40
-            requiredCoins = 240
-            requiredDebt = 280
-            break
+    if (realEstateInfo) {
+        for (const info of realEstateInfo) {
+            if (info.name === text) {
+                addRpmAmt = Number.parseInt(info.rpm)
+                requiredCoins = Number.parseInt(info.price)
+                addRpmAmt = Number.parseInt(info.rpm)
+                foundItem = true
+                requiredDebt = Number.parseInt(info.credit)
+                break
+            }
         }
     }
 
-    const useCoins = () => {
-        addItem((prevItems) => [...prevItems, text]);
-        setRpm(rpm => rpm + addRpmAmt)
 
+    if (!foundItem && stocksInfo) {
+        for (const info of stocksInfo) {
+            if (info.name === text) {
+                addRpmAmt = Number.parseInt(info.rpm)
+                requiredCoins = Number.parseInt(info.price)
+                addRpmAmt = Number.parseInt(info.rpm)
+                requiredDebt = info.credit
+                break
+            }
+        }
+    }
+
+    function postUpdate() {
         fetch("http://localhost:3001/buyItem", {
             method: "POST",
             headers: {
@@ -92,7 +67,17 @@ export default function PopUp({ text, isOverlayOn, setIsOverlayOn, addItem, setR
                 text: text, email: SessionInfo.get("Email")
             })
         })
-        setCoins(coins - requiredCoins)
+    }
+
+    const useCoins = () => {
+
+        if (coins >= requiredCoins) {
+            addItem((prevItems) => [...prevItems, text]);
+            setRpm(rpm => rpm + addRpmAmt)
+
+            postUpdate()
+            setCoins(coins - requiredCoins)
+        }
         cancelOverlay()
     }
 
@@ -103,12 +88,7 @@ export default function PopUp({ text, isOverlayOn, setIsOverlayOn, addItem, setR
             setRpm(rpm => rpm + addRpmAmt)
             setDebt(debt => debt + requiredDebt)
 
-            fetch("http://localhost:3001/buyItem", {
-                method: "POST",
-                body: JSON.stringify({
-                    text: text, email: SessionInfo.get("Email")
-                })
-            })
+            postUpdate()
         }
         cancelOverlay()
     }
