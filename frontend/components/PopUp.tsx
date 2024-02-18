@@ -100,7 +100,7 @@ export default function PopUp({ realEstateInfo, stocksInfo, text, isOverlayOn, s
             <p>How would you like to buy it?</p>
             <div className="flex justify-between">
                 <button className={`${coins >= requiredCoins ? "bg-yellow-300 px-5" : "bg-gray-500"}`} disabled={coins < requiredCoins} onClick={useCoins}>Coins</button>
-                <button onClick={useLoan} className="bg-green-400 px-5">Get a loan</button>
+                <button onClick={useLoan} className={` ${creditScore > 350 ? 'bg-green-400 px-5' : 'bg-gray-500'}`}>Get a loan</button>
             </div>
             <button className="bg-red-400 px-5 float-end mt-3" onClick={cancelOverlay}>Cancel</button>
         </div>
