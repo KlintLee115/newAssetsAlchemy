@@ -13,8 +13,8 @@ const DraggableItem = ({ itemId }: { itemId: string, }) => {
         (dragItemRef.current as any).style.position = 'absolute';
         setPosition({
             ...position,
-            x: e.clientX - (dragItemRef.current as any).getBoundingClientRect().left,
-            y: e.clientY - (dragItemRef.current as any).getBoundingClientRect().top,
+            x: e.clientX,
+            y: e.clientY,
         });
     };
 
